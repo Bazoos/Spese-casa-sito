@@ -1,0 +1,4 @@
+# L'indirizzo di questo sito e' pubblico in senso tecnico ma non deve
+# essere trovabile da un motore di ricerca.
+User-agent: *
+Disallow: /

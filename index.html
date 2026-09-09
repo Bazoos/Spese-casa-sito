@@ -1,0 +1,790 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Spese di casa</title>
+
+<!-- L'indirizzo e' pubblico in senso tecnico ma non deve essere trovabile. -->
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+<meta name="googlebot" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+
+<!-- Anteprima del link su WhatsApp: mostra gia' lo stato della raccolta.
+     Attenzione: WhatsApp tiene l'anteprima in cache per giorni. Vale come
+     promemoria, non come fonte aggiornata. -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Spese di casa">
+<meta property="og:description" content="Internet set–nov 2026: Lorenzo e Inquilino 3 deve restituire 77,38 €, entro il 15 dic · Francesco è in credito di 77,38 €; Lorenzo deve 38,69 €; Inquilino 3 deve 38,69 €">
+<meta name="twitter:card" content="summary">
+
+<!-- Aggiunta alla schermata home: il link si comporta come un'app. -->
+<meta name="theme-color" content="#f9f9f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0d0d0d" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Spese di casa">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http%3A//www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232a78d6'/%3E%3Cpath d='M6 15 16 7l10 8v9a2 2 0 0 1-2 2h-5v-6h-6v6H8a2 2 0 0 1-2-2z' fill='white'/%3E%3C/svg%3E">
+
+<style>
+/* Tutto il foglio di stile sta qui dentro: nessuna richiesta di rete, la
+   pagina si apre uguale con connessione pessima o senza connessione. */
+:root {
+  color-scheme: light;
+  --plane:      #f9f9f7;
+  --surface:    #ffffff;
+  --ink:        #0b0b0b;
+  --ink-2:      #52514e;
+  --muted:      #898781;
+  --hairline:   #e1e0d9;
+  --baseline:   #c3c2b7;
+  --anello:     rgba(11,11,11,.10);
+  --ok:         #0ca30c;
+  --ok-testo:   #006300;
+  --attesa:     #b26f00;
+  --critico:    #d03b3b;
+  --ok-sfondo:      #eef8ee;
+  --attesa-sfondo:  #fdf4e0;
+  --critico-sfondo: #fceeee;
+  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100;
+  --s5: #e87ba4; --s6: #008300; --s7: #4a3aa7; --s8: #e34948;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --plane:    #0d0d0d;
+    --surface:  #1a1a19;
+    --ink:      #ffffff;
+    --ink-2:    #c3c2b7;
+    --muted:    #898781;
+    --hairline: #2c2c2a;
+    --baseline: #383835;
+    --anello:   rgba(255,255,255,.10);
+    --ok:       #0ca30c;
+    --ok-testo: #0ca30c;
+    --attesa:   #fab219;
+    --critico:  #e66767;
+    --ok-sfondo:      #122112;
+    --attesa-sfondo:  #2a2109;
+    --critico-sfondo: #2a1414;
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
+    --s5: #d55181; --s6: #008300; --s7: #9085e9; --s8: #e66767;
+  }
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  padding: 20px 16px calc(48px + env(safe-area-inset-bottom));
+  background: var(--plane);
+  color: var(--ink);
+  font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+.foglio { max-width: 640px; margin: 0 auto; }
+
+/* ------------------------------------------------------------- testata */
+.testata { margin-bottom: 20px; }
+h1 {
+  margin: 0; font-size: 15px; font-weight: 600;
+  letter-spacing: .14em; text-transform: uppercase; color: var(--ink-2);
+  display: flex; align-items: center; gap: 8px;
+}
+h1 svg { flex: none; color: var(--s1); }
+.aggiornato { margin: 3px 0 0 26px; font-size: 12.5px; color: var(--muted); }
+
+/* ------------------------------------------ la riga che si legge per prima */
+.raccolta {
+  background: var(--surface);
+  border: 1px solid var(--anello);
+  border-left: 4px solid var(--bordo, var(--attesa));
+  border-radius: 12px;
+  padding: 16px 18px;
+  margin-bottom: 16px;
+}
+.raccolta .etichetta {
+  font-size: 12px; font-weight: 700; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--bordo, var(--attesa));
+  display: flex; align-items: center; gap: 6px; margin: 0;
+}
+
+/* Il tono lo decide la scadenza, e la scadenza passa anche quando nessuno
+   ricarica il foglio. Nel markup ci sono due varianti — quella con l'orologio
+   e quella con il triangolo — e queste regole ne accendono una sola.
+   I selettori sono incatenati apposta: la regola che nasconde deve pesare
+   più di quella che imposta display sugli span, o non nasconde niente. */
+.raccolta .etichetta > span,
+.riquadro .stato > span { display: inline-flex; align-items: center; gap: 6px; }
+
+.raccolta .etichetta > span.solo-scaduta,
+.riquadro .stato > span.solo-scaduta { display: none; }
+.raccolta.scaduta .etichetta > span.solo-scaduta,
+.riquadro.scaduta .stato > span.solo-scaduta { display: inline-flex; }
+.raccolta.scaduta .etichetta > span.se-in-tempo,
+.riquadro.scaduta .stato > span.se-in-tempo { display: none; }
+
+.raccolta .scadenza .solo-scaduta { display: none; }
+.raccolta.scaduta .scadenza .solo-scaduta { display: inline; }
+
+.raccolta.scaduta { --bordo: var(--critico); }
+.riquadro.scaduta { --accento: var(--critico); --sfondo: var(--critico-sfondo); }
+.raccolta .somma {
+  margin: 10px 0 0; font-size: 40px; font-weight: 700; line-height: 1;
+  letter-spacing: -.03em; color: var(--ink); font-variant-numeric: tabular-nums;
+}
+.raccolta h2 { margin: 8px 0 0; font-size: 16px; font-weight: 600; line-height: 1.35; }
+.raccolta .cifre { margin: 3px 0 0; font-size: 14.5px; color: var(--ink-2); }
+.raccolta .cifre b { color: var(--ink); font-weight: 600; }
+.raccolta .scadenza { margin: 12px 0 0; font-size: 14.5px; font-weight: 600; }
+.raccolta .altre { margin: 10px 0 0; font-size: 13px; color: var(--muted); }
+.tutto-a-posto { border-left-color: var(--ok); }
+.tutto-a-posto .etichetta { color: var(--ok-testo); }
+
+/* --------------------------------------------- un riquadro per inquilino */
+/* Una riga per inquilino, non tre riquadri: in tre su uno schermo di
+   telefono il terzo restava orfano su una seconda fila, e quello in pari
+   occupava lo stesso spazio di chi deve dei soldi. */
+.riquadri {
+  display: flex; flex-direction: column;
+  margin-bottom: 22px;
+  border: 1px solid var(--anello); border-radius: 12px;
+  background: var(--surface); overflow: hidden;
+}
+.riquadro {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  column-gap: 14px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--hairline);
+  border-left: 3px solid var(--accento, var(--baseline));
+  background: var(--sfondo, transparent);
+}
+.riquadro:last-child { border-bottom: none; }
+.riquadro .nome {
+  grid-column: 1; margin: 0;
+  font-size: 15.5px; font-weight: 600; color: var(--ink);
+}
+.riquadro .cifra {
+  grid-column: 2; grid-row: 1 / span 2; margin: 0;
+  font-size: 26px; font-weight: 700; letter-spacing: -.02em; line-height: 1;
+  color: var(--accento, var(--ink)); font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.riquadro .stato {
+  grid-column: 1; margin: 2px 0 0;
+  font-size: 13px; font-weight: 600; color: var(--accento, var(--ink-2));
+  display: flex; align-items: center; gap: 5px;
+}
+.riquadro .quando {
+  grid-column: 1 / -1; margin: 7px 0 0;
+  font-size: 12.5px; color: var(--ink-2);
+}
+.riquadro.in-pari .cifra { font-size: 19px; color: var(--ok-testo); }
+
+/* L'IBAN sta nel riquadro di chi deve pagare, non in quello di chi incassa:
+   compare a chi gli serve nel momento in cui gli serve, e non un istante
+   prima. Il codice e' scritto a gruppi di quattro perche' si controlli a
+   occhio; il pulsante copia la versione senza spazi, che e' quella che le
+   app di banca accettano. */
+.riquadro .iban {
+  grid-column: 1 / -1; margin: 8px 0 0;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+}
+.riquadro .iban + .iban { margin-top: 10px; }
+/* Il nome sta sempre su una riga sua: con due IBAN di lunghezza diversa,
+   lasciandolo scorrere accanto al codice, uno finiva a capo e l'altro no e
+   la coppia sembrava disallineata per sbaglio. */
+.riquadro .iban-chi {
+  flex: 0 0 100%; margin-bottom: -2px;
+  font-size: 12.5px; font-weight: 600; color: var(--ink-2);
+}
+.riquadro .iban code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12.5px; letter-spacing: .01em; color: var(--ink);
+  background: var(--plane); border: 1px solid var(--hairline);
+  border-radius: 7px; padding: 4px 8px;
+  overflow-wrap: anywhere;
+}
+.copia {
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--ink-2);
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: 7px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+.copia:hover { border-color: var(--baseline); color: var(--ink); }
+.copia:focus-visible { outline: 2px solid var(--accento, var(--ink)); outline-offset: 2px; }
+.copia.fatto { color: var(--ok-testo); border-color: var(--ok); }
+.v-ok      { --accento: var(--ok-testo);  --sfondo: var(--ok-sfondo); }
+.v-attesa  { --accento: var(--attesa);    --sfondo: var(--attesa-sfondo); }
+.v-critico { --accento: var(--critico);   --sfondo: var(--critico-sfondo); }
+
+/* --------------------------------------------------- sezioni richiudibili */
+details {
+  background: var(--surface);
+  border: 1px solid var(--anello);
+  border-radius: 12px;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+summary {
+  cursor: pointer; padding: 14px 18px; font-size: 15px; font-weight: 600;
+  list-style: none; display: flex; align-items: center; gap: 10px;
+}
+/* Il titolo spinge tutto il resto a destra; il conteggio dice cosa c'e'
+   dentro senza doverla aprire. */
+.titolo-sezione { margin-right: auto; }
+.conto { font-size: 13px; font-weight: 400; color: var(--muted); }
+summary::-webkit-details-marker { display: none; }
+summary::after {
+  content: ""; width: 8px; height: 8px; flex: none;
+  border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted);
+  transform: rotate(45deg) translate(-2px, -2px); transition: transform .15s;
+}
+details[open] summary::after { transform: rotate(-135deg) translate(-2px, -2px); }
+summary:focus-visible { outline: 2px solid var(--s1); outline-offset: -2px; }
+.corpo { padding: 0 18px 18px; }
+.corpo > h3 {
+  font-size: 13px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+  color: var(--muted); margin: 22px 0 10px;
+}
+.corpo > h3:first-child { margin-top: 4px; }
+
+/* ---------------------------------------------------------------- tabella */
+.scorre { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { padding: 9px 10px; text-align: left; border-bottom: 1px solid var(--hairline); }
+th { font-size: 12px; font-weight: 600; color: var(--muted); white-space: nowrap; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+tbody tr:last-child td { border-bottom: none; }
+.riga-chiusa td { color: var(--muted); }
+.desc { font-weight: 600; color: var(--ink); }
+.desc small { display: block; font-weight: 400; color: var(--muted); font-size: 12px; }
+
+.gettone {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 12px; padding: 2px 7px; border-radius: 20px; white-space: nowrap;
+  border: 1px solid var(--anello);
+}
+.g-ok  { color: var(--ok-testo);  background: var(--ok-sfondo); }
+.g-no  { color: var(--critico);   background: var(--critico-sfondo); }
+.gettoni { display: flex; flex-wrap: wrap; gap: 4px; }
+
+/* Sotto i 560px la tabella diventa un elenco di schede: cinque colonne su
+   uno schermo stretto scorrevano di lato, e il taglio a destra si vedeva
+   come un difetto invece che come "c'è dell'altro". */
+@media (max-width: 560px) {
+  .dettaglio thead { display: none; }
+  .dettaglio, .dettaglio tbody, .dettaglio tr, .dettaglio td { display: block; width: 100%; }
+  .dettaglio tr {
+    border: 1px solid var(--anello); border-radius: 10px;
+    padding: 12px 14px; margin-bottom: 10px;
+  }
+  .dettaglio td { border-bottom: none; padding: 3px 0; }
+  .dettaglio td.num { text-align: left; }
+  .dettaglio td[data-etichetta]::before {
+    content: attr(data-etichetta) " ";
+    color: var(--muted); font-weight: 400;
+  }
+  .dettaglio td:empty { display: none; }
+}
+
+.stato-spesa { font-size: 12px; white-space: nowrap; }
+.s-raccolta  { color: var(--attesa); }
+.s-anticipata{ color: var(--critico); font-weight: 600; }
+.s-chiusa    { color: var(--muted); }
+
+a { color: var(--s1); }
+a.allegato {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 13px; text-decoration: none; font-weight: 600;
+}
+a.allegato:hover { text-decoration: underline; }
+
+/* ---------------------------------------------------------------- grafici */
+figure { margin: 0 0 6px; }
+figcaption { font-size: 13px; color: var(--ink-2); margin-bottom: 10px; }
+/* I filtri sono anche la legenda: un solo posto dove leggere il colore di
+   una categoria e accenderla o spegnerla. */
+.filtri { display: flex; flex-wrap: wrap; gap: 7px; margin: 0 0 14px; }
+.filtro {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-family: inherit; font-size: 13px; font-weight: 500; line-height: 1;
+  color: var(--ink-2); background: var(--surface);
+  border: 1px solid var(--anello); border-radius: 20px;
+  padding: 7px 12px; cursor: pointer;
+  transition: background .12s, border-color .12s, color .12s;
+}
+.filtro i { width: 10px; height: 10px; border-radius: 3px; flex: none; transition: opacity .12s; }
+.filtro:hover { border-color: var(--baseline); }
+.filtro:focus-visible { outline: 2px solid var(--s1); outline-offset: 2px; }
+/* Spenta: il colore resta visibile ma smorzato, cosi' si capisce che la
+   categoria c'e' ed e' solo nascosta. Il colore non cambia mai categoria. */
+.filtro[aria-pressed="false"] { color: var(--muted); background: transparent; }
+.filtro[aria-pressed="false"] i { opacity: .25; }
+.filtro.tutte { color: var(--s1); font-weight: 600; }
+.filtro.tutte[hidden] { display: none; }
+.vuoto-grafico { font-size: 14px; color: var(--muted); padding: 24px 0; }
+
+/* I due grafici stanno in contenitori della stessa larghezza, cosi' i mesi
+   restano incolonnati fra l'uno e l'altro; i margini automatici li centrano
+   quando ci stanno, e si annullano da soli quando il grafico e' piu' largo
+   dello schermo e la striscia deve scorrere. */
+#grafico-mesi, #grafico-totale { margin-left: auto; margin-right: auto; }
+
+/* La scelta del mese */
+.scelta-mese { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.scelta-mese label { font-size: 13px; color: var(--muted); }
+.scelta-mese select {
+  font-family: inherit; font-size: 15px; font-weight: 600; color: var(--ink);
+  background: var(--surface); border: 1px solid var(--anello); border-radius: 8px;
+  padding: 8px 11px; cursor: pointer; flex: 1; min-width: 0; max-width: 260px;
+}
+.scelta-mese select:focus-visible { outline: 2px solid var(--s1); outline-offset: 2px; }
+
+table.mese { margin-bottom: 6px; }
+table.mese .pallino {
+  display: inline-block; width: 9px; height: 9px; border-radius: 3px;
+  margin-right: 8px; flex: none; vertical-align: baseline;
+}
+table.mese tfoot td { border-top: 1px solid var(--baseline); border-bottom: none; font-weight: 700; }
+table.mese tfoot td.num { color: var(--ink); }
+.riga-quota { font-size: 13px; color: var(--ink-2); margin: 10px 0 0; }
+.riga-quota b { color: var(--ink); font-weight: 600; }
+svg { display: block; height: auto; }
+
+/* ----------------------------------------------------------------- coda */
+.coda { margin-top: 26px; font-size: 12px; color: var(--muted); line-height: 1.6; }
+.vuoto { color: var(--muted); font-size: 14px; padding: 4px 0 8px; }
+</style>
+</head>
+<body>
+<main class="foglio">
+
+  <header class="testata">
+    <h1><svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 11.2 12 4.5l8 6.7V20a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z" fill="currentColor"/></svg>Spese di casa</h1>
+    <p class="aggiornato">Dati aggiornati al 9 settembre 2026 alle 14:31</p>
+  </header>
+
+  <section class="raccolta" data-scadenza="2026-12-15"><p class="etichetta"><span class="se-in-tempo"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="6.2" stroke="currentColor" stroke-width="1.8"/><path d="M8 4.6V8l2.4 1.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> Da restituire</span><span class="solo-scaduta"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 1.8 15 14H1L8 1.8Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M8 6.2v3.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="8" cy="11.6" r="1" fill="currentColor"/></svg> Da restituire</span></p><p class="somma">77,38 €</p><h2>Internet set–nov 2026 — 116,07 €</h2><p class="cifre">Ha già pagato Francesco: Lorenzo e Inquilino 3 devono restituirglieli.</p><p class="scadenza"><span data-quando>Entro il 15 dicembre 2026, fra 97 giorni.</span></p></section>
+
+  <section class="riquadri" aria-label="Situazione di ciascun inquilino">
+    <article class="riquadro v-ok in-pari"><p class="nome">Francesco</p><p class="cifra">+77,38 €</p><p class="stato"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5 6.2 12 13 4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> in credito</p><p class="quando">In arrivo: 38,69 € da Lorenzo e 38,69 € da Inquilino 3.</p></article><article class="riquadro v-attesa" data-scadenza="2026-12-15"><p class="nome">Lorenzo</p><p class="cifra">38,69 €</p><p class="stato"><span class="se-in-tempo"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="6.2" stroke="currentColor" stroke-width="1.8"/><path d="M8 4.6V8l2.4 1.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> da restituire</span><span class="solo-scaduta"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 1.8 15 14H1L8 1.8Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M8 6.2v3.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="8" cy="11.6" r="1" fill="currentColor"/></svg> da restituire</span></p><p class="quando">Da girare a Francesco. <span data-quando>Entro il 15 dicembre 2026, fra 97 giorni.</span></p></article><article class="riquadro v-attesa" data-scadenza="2026-12-15"><p class="nome">Inquilino 3</p><p class="cifra">38,69 €</p><p class="stato"><span class="se-in-tempo"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="6.2" stroke="currentColor" stroke-width="1.8"/><path d="M8 4.6V8l2.4 1.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> da restituire</span><span class="solo-scaduta"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 1.8 15 14H1L8 1.8Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M8 6.2v3.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="8" cy="11.6" r="1" fill="currentColor"/></svg> da restituire</span></p><p class="quando">Da girare a Francesco. <span data-quando>Entro il 15 dicembre 2026, fra 97 giorni.</span></p></article>
+  </section>
+
+  <details>
+    <summary><span class="titolo-sezione">Dettaglio</span><span class="conto">1 spesa</span></summary>
+    <div class="corpo"><div class="scorre"><table class="dettaglio"><thead><tr><th>Spesa</th><th>Competenza</th><th class="num">Totale</th><th class="num">A testa</th><th>Chi ha versato</th></tr></thead><tbody><tr><td class="desc">Internet set–nov 2026<small>Internet · <span class="stato-spesa s-anticipata">già anticipata</span> · pagata da Francesco</small></td><td data-etichetta="competenza">set–nov 2026</td><td class="num" data-etichetta="totale">116,07 €</td><td class="num" data-etichetta="a testa">38,69 €</td><td><div class="gettoni"><span class="gettone g-ok"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5 6.2 12 13 4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Francesco</span><span class="gettone g-no"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 1.8 15 14H1L8 1.8Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M8 6.2v3.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="8" cy="11.6" r="1" fill="currentColor"/></svg> Lorenzo</span><span class="gettone g-no"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 1.8 15 14H1L8 1.8Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M8 6.2v3.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="8" cy="11.6" r="1" fill="currentColor"/></svg> Inquilino 3</span></div></td></tr></tbody></table></div></div>
+  </details>
+
+  <details>
+    <summary><span class="titolo-sezione">Resoconto</span><span class="conto">3 mesi</span></summary>
+    <div class="corpo"><h3>Un mese alla volta</h3><div class="scelta-mese"><label for="scelta-mese">Mese</label><select id="scelta-mese"></select></div><div id="resoconto-mese"></div><h3>Andamento</h3><figure><figcaption id="dida-mesi">Quanto è costata la casa ogni mese. Le spese che coprono più mesi sono divise in parti uguali sui mesi che coprono.</figcaption><div class="scorre"><div id="grafico-mesi"></div></div></figure><figure style="margin-top:18px"><figcaption>Totale speso da quando si tiene il conto.</figcaption><div class="scorre"><div id="grafico-totale"></div></div></figure><noscript><p class="vuoto">I grafici hanno bisogno di JavaScript. Gli stessi numeri sono nella tabella qui sopra.</p></noscript><script type="application/json" id="dati-grafico">{"mesi":[[2026,9],[2026,10],[2026,11]],"inquilini":3,"serie":[{"nome":"Internet","colore":"--s1","valori":[38.69,38.69,38.69]}],"spese":[{"nome":"Internet set–nov 2026","categoria":"Internet","serie":0,"da":0,"a":2,"mensile":38.69}]}</script></div>
+  </details>
+
+  <details>
+    <summary><span class="titolo-sezione">Bollette</span><span class="conto">nessuna scansione</span></summary>
+    <div class="corpo"><p class="vuoto">Non c'è ancora nessuna scansione pubblicata. Quando ce ne sarà una, comparirà qui accanto alla sua spesa.</p></div>
+  </details>
+
+  <p class="coda">Le quote sono divise in parti uguali fra 3. Ogni numero di questa pagina viene dal foglio delle spese: la pagina si rifà da sola a ogni modifica del foglio. Se un numero sembra sbagliato, si corregge nel foglio, non qui.</p>
+
+</main>
+
+<script>
+/* L'unico script della pagina, insieme alle sezioni richiudibili che sono
+   HTML puro. Non chiede niente alla rete: ricalcola solo, al momento in cui
+   apri la pagina, quanto manca alle scadenze — altrimenti "fra 4 giorni"
+   resterebbe fermo al giorno in cui il foglio è stato caricato l'ultima
+   volta, e una scadenza passata continuerebbe a sembrare tranquilla.
+   Senza JavaScript la pagina resta leggibile: mostra i valori del giorno
+   in cui è stata costruita, e la data per esteso è sempre lì. */
+(function () {
+  var MESI = ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno",
+              "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"];
+  var oggi = new Date();
+  oggi = new Date(oggi.getFullYear(), oggi.getMonth(), oggi.getDate());
+
+  function giorni(iso) {
+    var p = iso.split("-");
+    return Math.round((new Date(+p[0], +p[1] - 1, +p[2]) - oggi) / 86400000);
+  }
+
+  function frase(iso) {
+    var p = iso.split("-"), g = giorni(iso);
+    var data = (+p[2]) + " " + MESI[+p[1] - 1] + " " + p[0];
+    var rel = g > 1 ? "fra " + g + " giorni"
+            : g === 1 ? "domani"
+            : g === 0 ? "oggi"
+            : g === -1 ? "ieri"
+            : (-g) + " giorni fa";
+    return (g < 0 ? "Era in scadenza il " : "Entro il ") + data + ", " + rel + ".";
+  }
+
+  var nodi = document.querySelectorAll("[data-scadenza]");
+  for (var i = 0; i < nodi.length; i++) {
+    var el = nodi[i], iso = el.getAttribute("data-scadenza");
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(iso)) continue;
+    if (giorni(iso) < 0) el.className += " scaduta";
+    var q = el.querySelector("[data-quando]");
+    if (q) q.textContent = frase(iso);
+  }
+})();
+</script>
+
+<script>
+/* Il pulsante "Copia IBAN". Copia la versione senza spazi, che e' quella che
+   le app di banca accettano; sullo schermo resta quella a gruppi di quattro,
+   che si controlla a occhio.
+   navigator.clipboard non c'e' su http o su qualche browser vecchio, e
+   fallisce comunque se la pagina non ha il fuoco: in quel caso si passa al
+   vecchio execCommand. Se non funziona nemmeno quello si seleziona il codice,
+   cosi' resta un copia-incolla a mano invece di un pulsante che non fa
+   niente e non lo dice. */
+(function () {
+  var pulsanti = document.querySelectorAll(".copia");
+  if (!pulsanti.length) return;
+
+  function conFallback(testo) {
+    var area = document.createElement("textarea");
+    area.value = testo;
+    area.setAttribute("readonly", "");
+    area.style.position = "fixed";
+    area.style.top = "-1000px";
+    document.body.appendChild(area);
+    area.select();
+    var riuscito = false;
+    try { riuscito = document.execCommand("copy"); } catch (e) { riuscito = false; }
+    document.body.removeChild(area);
+    return riuscito;
+  }
+
+  function conferma(b, testo, classe) {
+    var et = b.querySelector(".etichetta-copia") || b;
+    if (b.getAttribute("data-originale") === null) {
+      b.setAttribute("data-originale", et.textContent);
+    }
+    et.textContent = testo;
+    b.className = "copia" + (classe ? " " + classe : "");
+    clearTimeout(b.tornaIndietro);
+    b.tornaIndietro = setTimeout(function () {
+      et.textContent = b.getAttribute("data-originale");
+      b.className = "copia";
+    }, 2000);
+  }
+
+  function seleziona(b) {
+    var code = b.parentNode.querySelector("code");
+    if (!code || !window.getSelection || !document.createRange) return;
+    var r = document.createRange();
+    r.selectNodeContents(code);
+    var sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(r);
+  }
+
+  for (var i = 0; i < pulsanti.length; i++) {
+    pulsanti[i].addEventListener("click", function () {
+      var b = this, testo = b.getAttribute("data-copia");
+      if (!testo) return;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(testo).then(function () {
+          conferma(b, "Copiato", "fatto");
+        }, function () {
+          if (conFallback(testo)) { conferma(b, "Copiato", "fatto"); }
+          else { seleziona(b); conferma(b, "Copialo a mano", ""); }
+        });
+      } else if (conFallback(testo)) {
+        conferma(b, "Copiato", "fatto");
+      } else {
+        seleziona(b);
+        conferma(b, "Copialo a mano", "");
+      }
+    });
+  }
+})();
+</script>
+
+<script>
+/* I grafici. Nessuna libreria: l'SVG lo scrive questa funzione, con gli stessi
+   numeri che stanno nella tabella qui sopra. Si ridisegna tutto da capo ogni
+   volta che si accende o si spegne una categoria, perche' cambiando le serie
+   cambia anche la scala: nascondere le barre e lasciare l'asse com'era
+   vorrebbe dire mostrare un grafico che mente. */
+(function () {
+  var blocco = document.getElementById("dati-grafico");
+  if (!blocco) return;
+  var DATI;
+  try { DATI = JSON.parse(blocco.textContent); } catch (e) { return; }
+  if (!DATI.serie || !DATI.serie.length) return;
+
+  var MESI = ["gen", "feb", "mar", "apr", "mag", "giu",
+              "lug", "ago", "set", "ott", "nov", "dic"];
+
+  var PASSO = 42, BARRA = 28, RAGGIO = 4, STACCO = 2;
+  var SX = 58, DX = 14, SU = 24, GIU = 36, ALT_BARRE = 190, ALT_LINEA = 130, CODA = 78;
+
+  var soldi = new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR" });
+  var soldiTondi = new Intl.NumberFormat("it-IT",
+    { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
+  function euro(v) { return soldi.format(v); }
+  function euroBreve(v) { return Math.abs(v % 1) < 0.005 ? soldiTondi.format(v) : soldi.format(v); }
+
+  function passoBello(intervallo) {
+    if (intervallo <= 0) return 1;
+    var grezzo = intervallo / 5;
+    var mag = Math.pow(10, Math.floor(Math.log(grezzo) / Math.LN10));
+    var passi = [1, 2, 2.5, 5, 10];
+    for (var i = 0; i < passi.length; i++) {
+      if (grezzo <= passi[i] * mag) return passi[i] * mag;
+    }
+    return 10 * mag;
+  }
+
+  function scala(min, max) {
+    min = Math.min(0, min); max = Math.max(0, max);
+    if (max - min < 1e-9) max = 1;
+    var p = passoBello(max - min);
+    var basso = min < 0 ? p * (Math.ceil(-min / p)) * -1 : 0;
+    var alto = p * Math.ceil(max / p);
+    if (alto <= basso) alto = basso + p;
+    var tacche = [], v = basso;
+    while (v <= alto + 1e-9) { tacche.push(Math.round(v * 1e6) / 1e6); v += p; }
+    return { basso: basso, alto: alto, tacche: tacche };
+  }
+
+  function tacca(x1, y, x2, valore) {
+    var colore = Math.abs(valore) < 1e-9 ? "var(--baseline)" : "var(--hairline)";
+    return '<line x1="' + x1 + '" y1="' + y.toFixed(1) + '" x2="' + x2 + '" y2="' + y.toFixed(1) +
+           '" stroke="' + colore + '" stroke-width="1"/>' +
+           '<text x="' + (SX - 10) + '" y="' + (y + 3.5).toFixed(1) + '" text-anchor="end" ' +
+           'font-size="10" fill="var(--muted)">' + euroBreve(valore) + '</text>';
+  }
+
+  function etichetteMesi(mesi, y) {
+    var fuori = "";
+    for (var i = 0; i < mesi.length; i++) {
+      var cx = SX + i * PASSO + PASSO / 2;
+      fuori += '<text x="' + cx.toFixed(1) + '" y="' + y + '" text-anchor="middle" ' +
+               'font-size="11" fill="var(--muted)">' + MESI[mesi[i][1] - 1] + '</text>';
+      if (i === 0 || mesi[i][1] === 1) {
+        fuori += '<text x="' + cx.toFixed(1) + '" y="' + (y + 13) + '" text-anchor="middle" ' +
+                 'font-size="10" fill="var(--muted)">' + mesi[i][0] + '</text>';
+      }
+    }
+    return fuori;
+  }
+
+  /* Rettangolo con i due angoli in alto arrotondati: l'estremita' del dato. */
+  function barraArrotondata(x, y, w, h, r) {
+    r = Math.max(0, Math.min(r, w / 2, h));
+    return "M" + x.toFixed(1) + " " + (y + h).toFixed(1) + " v" + (-(h - r)).toFixed(1) +
+           " a" + r + " " + r + " 0 0 1 " + r + " " + (-r) +
+           " h" + (w - 2 * r) + " a" + r + " " + r + " 0 0 1 " + r + " " + r +
+           " v" + (h - r).toFixed(1) + " z";
+  }
+
+  function grafToBarre(mesi, serie) {
+    var alti = [], bassi = [];
+    for (var i = 0; i < mesi.length; i++) {
+      var su = 0, giu = 0;
+      serie.forEach(function (s) { var v = s.valori[i]; if (v > 0) su += v; else giu += v; });
+      alti.push(su); bassi.push(giu);
+    }
+    var sc = scala(Math.min.apply(null, bassi.concat([0])),
+                   Math.max.apply(null, alti.concat([0])));
+    function y(v) { return SU + ALT_BARRE * (sc.alto - v) / (sc.alto - sc.basso); }
+
+    var W = SX + mesi.length * PASSO + DX, H = SU + ALT_BARRE + GIU;
+    var out = '<svg viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H +
+              '" role="img" aria-label="Spesa di ogni mese"><title>Spesa mensile</title>';
+    sc.tacche.forEach(function (t) { out += tacca(SX - 6, y(t), W - DX, t); });
+
+    /* O si scrivono i totali su tutte le barre, o solo su quella piu' alta.
+       Scriverne alcune si' e alcune no, secondo chi ci sta, fa sembrare la
+       scelta casuale: e' meglio una sola etichetta scelta apposta. */
+    var larghezze = alti.map(function (v) {
+      return Math.abs(v) > 0.005 ? euroBreve(v).length * 5.8 : 0;
+    });
+    var ciStannoTutte = larghezze.every(function (w) { return w <= PASSO - 4; });
+    var piuAlta = alti.indexOf(Math.max.apply(null, alti));
+
+    for (var i = 0; i < mesi.length; i++) {
+      var x = SX + i * PASSO + (PASSO - BARRA) / 2;
+      [1, -1].forEach(function (verso) {
+        var pezzi = serie.filter(function (s) { return s.valori[i] * verso > 0.005; });
+        var cum = 0;
+        pezzi.forEach(function (s, k) {
+          var v = s.valori[i], y0 = y(cum + v), y1 = y(cum);
+          var cima = verso > 0 ? y0 : y1, fondo = verso > 0 ? y1 : y0;
+          var h = fondo - cima;
+          if (h >= 1) {
+            var stacco = k === 0 ? 0 : STACCO;
+            var yy = verso > 0 ? cima : cima + stacco;
+            var hh = h - stacco;
+            var colore = "var(" + s.colore + ")";
+            if (verso > 0 && k === pezzi.length - 1) {
+              out += '<path d="' + barraArrotondata(x, yy, BARRA, hh, RAGGIO) + '" fill="' + colore + '"/>';
+            } else {
+              out += '<rect x="' + x.toFixed(1) + '" y="' + yy.toFixed(1) + '" width="' + BARRA +
+                     '" height="' + Math.max(hh, 0.5).toFixed(1) + '" fill="' + colore + '"/>';
+            }
+          }
+          cum += v;
+        });
+      });
+      if (Math.abs(alti[i]) > 0.005 && (ciStannoTutte || i === piuAlta)) {
+        out += '<text x="' + (x + BARRA / 2).toFixed(1) + '" y="' + (y(alti[i]) - 6).toFixed(1) +
+               '" text-anchor="middle" font-size="10" fill="var(--muted)">' +
+               euroBreve(alti[i]) + '</text>';
+      }
+    }
+    out += etichetteMesi(mesi, SU + ALT_BARRE + 18) + "</svg>";
+    return { svg: out, larghezza: W };
+  }
+
+  function grafToTotale(mesi, serie) {
+    var cumulato = [], somma = 0;
+    for (var i = 0; i < mesi.length; i++) {
+      serie.forEach(function (s) { somma += s.valori[i]; });
+      cumulato.push(Math.round(somma * 100) / 100);
+    }
+    var sc = scala(Math.min.apply(null, cumulato.concat([0])),
+                   Math.max.apply(null, cumulato.concat([0])));
+    function y(v) { return 16 + ALT_LINEA * (sc.alto - v) / (sc.alto - sc.basso); }
+
+    var W = SX + mesi.length * PASSO + CODA, H = 16 + ALT_LINEA + GIU;
+    var out = '<svg viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H +
+              '" role="img" aria-label="Totale speso mese dopo mese"><title>Totale speso</title>';
+    sc.tacche.forEach(function (t) { out += tacca(SX - 6, y(t), W - CODA + 6, t); });
+
+    var punti = cumulato.map(function (v, i) {
+      return (SX + i * PASSO + PASSO / 2).toFixed(1) + "," + y(v).toFixed(1);
+    });
+    out += '<polyline fill="none" stroke="var(--s1)" stroke-width="2" ' +
+           'stroke-linejoin="round" stroke-linecap="round" points="' + punti.join(" ") + '"/>';
+    var cx = SX + (mesi.length - 1) * PASSO + PASSO / 2, cy = y(cumulato[cumulato.length - 1]);
+    out += '<circle cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="4.5" ' +
+           'fill="var(--s1)" stroke="var(--surface)" stroke-width="2"/>';
+    out += '<text x="' + (cx + 10).toFixed(1) + '" y="' + (cy + 4).toFixed(1) + '" ' +
+           'text-anchor="start" font-size="12" font-weight="600" fill="var(--ink)">' +
+           euro(cumulato[cumulato.length - 1]) + '</text>';
+    out += etichetteMesi(mesi, 16 + ALT_LINEA + 18) + "</svg>";
+    return { svg: out, larghezza: W };
+  }
+
+  /* ------------------------------------------------- un mese alla volta */
+  var MESI_INTERI = ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno",
+                     "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"];
+  var scelta = document.getElementById("scelta-mese");
+  var doveMese = document.getElementById("resoconto-mese");
+
+  function resoconto(i) {
+    var quante = DATI.inquilini || 1;
+    var dentro = (DATI.spese || []).filter(function (s) { return s.da <= i && i <= s.a; });
+    if (!dentro.length) {
+      doveMese.innerHTML = '<p class="vuoto">In questo mese non cade nessuna spesa.</p>';
+      return;
+    }
+    var totale = dentro.reduce(function (t, s) { return t + s.mensile; }, 0);
+    var righe = dentro.map(function (s) {
+      var colore = (DATI.serie[s.serie] || {}).colore || "--s1";
+      return '<tr><td class="desc"><span class="pallino" style="background:var(' + colore + ')"></span>' +
+             s.nome + '<small>' + s.categoria + '</small></td>' +
+             '<td class="num">' + euro(s.mensile) + '</td>' +
+             '<td class="num">' + euro(s.mensile / quante) + '</td></tr>';
+    }).join("");
+    doveMese.innerHTML =
+      '<div class="scorre"><table class="mese"><thead><tr><th>Spesa</th>' +
+      '<th class="num">Nel mese</th><th class="num">A testa</th></tr></thead>' +
+      '<tbody>' + righe + '</tbody>' +
+      '<tfoot><tr><td>Totale del mese</td><td class="num">' + euro(totale) + '</td>' +
+      '<td class="num">' + euro(totale / quante) + '</td></tr></tfoot></table></div>' +
+      '<p class="riga-quota">In ' + MESI_INTERI[DATI.mesi[i][1] - 1] + ' la casa è costata <b>' +
+      euro(totale) + '</b>, cioè <b>' + euro(totale / quante) + '</b> a testa. ' +
+      'È la quota di competenza del mese: quando si versa lo dicono le scadenze, ' +
+      'nel dettaglio qui sopra.</p>';
+  }
+
+  if (scelta && doveMese) {
+    scelta.innerHTML = DATI.mesi.map(function (m, i) {
+      return '<option value="' + i + '">' + MESI_INTERI[m[1] - 1] + " " + m[0] + '</option>';
+    }).join("");
+    /* Si apre sul mese corrente se c'e', altrimenti sull'ultimo con dei dati:
+       "questo mese" e' quasi sempre quello che si vuole vedere. */
+    var ora = new Date(), scelto = DATI.mesi.length - 1;
+    for (var k = 0; k < DATI.mesi.length; k++) {
+      if (DATI.mesi[k][0] === ora.getFullYear() && DATI.mesi[k][1] === ora.getMonth() + 1) scelto = k;
+    }
+    scelta.value = String(scelto);
+    scelta.addEventListener("change", function () { resoconto(+scelta.value); });
+    resoconto(scelto);
+  }
+
+  var accese = DATI.serie.map(function () { return true; });
+
+  function disegna() {
+    var scelte = DATI.serie.filter(function (s, i) { return accese[i]; });
+    var mesi = DATI.mesi;
+    var dove1 = document.getElementById("grafico-mesi");
+    var dove2 = document.getElementById("grafico-totale");
+    if (!scelte.length) {
+      dove1.innerHTML = '<p class="vuoto-grafico">Nessuna categoria selezionata.</p>';
+      dove2.innerHTML = "";
+      return;
+    }
+    var a = grafToBarre(mesi, scelte), b = grafToTotale(mesi, scelte);
+    var largo = Math.max(a.larghezza, b.larghezza);
+    [[dove1, a], [dove2, b]].forEach(function (par) {
+      par[0].style.minWidth = largo + "px";
+      par[0].style.width = largo + "px";
+      par[0].style.maxWidth = "100%";
+      par[0].innerHTML = par[1].svg;
+    });
+    var dida = document.getElementById("dida-mesi");
+    if (dida) {
+      dida.firstChild.nodeValue = scelte.length === DATI.serie.length
+        ? "Quanto è costata la casa ogni mese. "
+        : "Quanto è costata la casa ogni mese, per " +
+          scelte.map(function (s) { return s.nome; }).join(" e ") + ". ";
+    }
+  }
+
+  var bottoni = [].slice.call(document.querySelectorAll(".filtro[data-serie]"));
+  var tutte = document.querySelector(".filtro.tutte");
+
+  function aggiornaBottoni() {
+    bottoni.forEach(function (b, i) { b.setAttribute("aria-pressed", accese[i] ? "true" : "false"); });
+    if (tutte) tutte.hidden = accese.every(function (v) { return v; });
+  }
+
+  bottoni.forEach(function (b) {
+    b.addEventListener("click", function () {
+      var i = +b.getAttribute("data-serie");
+      var quante = accese.filter(Boolean).length;
+      /* Spegnere l'ultima accesa non lascia il grafico vuoto: rimette tutto,
+         che e' quasi sempre quello che si vuole dopo aver isolato una voce. */
+      if (accese[i] && quante === 1) accese = accese.map(function () { return true; });
+      else accese[i] = !accese[i];
+      aggiornaBottoni(); disegna();
+    });
+  });
+  if (tutte) {
+    tutte.addEventListener("click", function () {
+      accese = accese.map(function () { return true; });
+      aggiornaBottoni(); disegna();
+    });
+  }
+
+  aggiornaBottoni();
+  disegna();
+})();
+</script>
+</body>
+</html>
